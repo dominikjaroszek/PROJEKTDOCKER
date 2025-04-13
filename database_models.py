@@ -10,7 +10,7 @@ class UnitermModel(Base):
     left_part = Column(Text, nullable=True)
     right_part = Column(Text, nullable=True)
     separator = Column(String(10), nullable=True)
-    full_string = Column(String(768), index=True, nullable=False)# Changed from Text to String
+    full_string = Column(String(768), index=True, nullable=False)
 
     stage1_left = Column(Text, nullable=True)
     stage1_separator = Column(String(10), nullable=True)

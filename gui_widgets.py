@@ -48,7 +48,7 @@ class UnitermWidget(QWidget):
         full_text = self.get_full_string()
         if not full_text:
             painter.setPen(Qt.GlobalColor.gray)
-            painter.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, "[Uniterm Display]")
+            painter.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, "")
             return
 
         font = self.font()

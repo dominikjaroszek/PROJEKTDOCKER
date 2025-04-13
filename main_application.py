@@ -1,5 +1,3 @@
-# main_application.py
-
 import sys
 import traceback
 from typing import Optional, Tuple, Dict
@@ -11,7 +9,6 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
-# Importy z refaktoryzowanych modułów
 from config import CONFIG
 from database_manager import DatabaseManager
 from uniterm_repository import UnitermRepository
@@ -25,8 +22,6 @@ class UnitermApp(QWidget):
         self.uniterm_ii: Optional[Tuple[str, str, str]] = None
         self.db_available = False
 
-        # Inicjalizacja komponentów bazy danych
-        # Dodano obsługę błędu, jeśli inicjalizacja DB zawiedzie
         try:
             self.db_manager = DatabaseManager(CONFIG["db"])
             self.uniterm_repo = UnitermRepository(self.db_manager)
@@ -34,25 +29,22 @@ class UnitermApp(QWidget):
              QMessageBox.critical(self, "Błąd Krytyczny DB",
                                   f"Nie można zainicjować menedżera bazy danych: {e}\n"
                                   "Aplikacja zostanie zamknięta.")
-             # Można też ustawić db_available = False i kontynuować bez funkcji DB
-             # sys.exit(1) # Przykładowe wyjście z aplikacji
              self.db_manager = None
              self.uniterm_repo = None
-             self.db_available = False # Ważne, aby reszta kodu wiedziała
+             self.db_available = False 
 
-        # Kontynuuj tylko jeśli db_manager i uniterm_repo zostały utworzone
+
         if self.db_manager and self.uniterm_repo:
             self.init_db_check()
         else:
-             self.db_available = False # Upewnij się, że jest False
+             self.db_available = False 
 
-        self.init_ui() # UI inicjujemy zawsze, ale panel DB będzie wyłączony
+        self.init_ui() 
 
         if self.db_available:
              self.refresh_uniterm_list()
 
     def init_db_check(self):
-        # Sprawdź czy db_manager istnieje przed użyciem
         if not self.db_manager:
              self.db_available = False
              return
@@ -66,15 +58,14 @@ class UnitermApp(QWidget):
             else:
                  raise RuntimeError("MySQL container check failed or DB not responsive.")
         except Exception as e:
-             # Komunikat już mógł być pokazany w __init__ jeśli błąd był przy tworzeniu silnika
-             if "Nie można zainicjować menedżera bazy danych" not in str(e): # Unikaj duplikatu komunikatu
+             if "Nie można zainicjować menedżera bazy danych" not in str(e): 
                  QMessageBox.critical(self, "Krytyczny Błąd Inicjalizacji DB",
                                       f"Nie udało się połączyć lub skonfigurować bazy danych: {e}\n"
                                       "Funkcjonalność bazy danych będzie niedostępna.")
              self.db_available = False
 
     def init_ui(self):
-        self.setWindowTitle('Uniterm Generator & Combiner (Refactored)')
+        self.setWindowTitle('Uniterm')
         self.setGeometry(100, 100, 950, 700)
 
         main_layout = QHBoxLayout(self)
@@ -83,7 +74,6 @@ class UnitermApp(QWidget):
         left_panel = self._create_left_panel()
         splitter.addWidget(left_panel)
 
-        # Panel DB tworzymy zawsze, ale może być wyłączony
         right_panel = self._create_right_panel()
         splitter.addWidget(right_panel)
 
@@ -96,7 +86,6 @@ class UnitermApp(QWidget):
         layout = QVBoxLayout(panel)
         layout.setSpacing(15)
 
-        # === Group Box I ===
         group_i = QGroupBox("Etap I")
         layout_i = QVBoxLayout()
         inputs_i = QHBoxLayout()
@@ -104,7 +93,7 @@ class UnitermApp(QWidget):
         self.input_i_sep = QComboBox(editable=False)
         self.input_i_sep.setFixedWidth(50)
         self.input_i_sep.addItems([';', ':'])
-        self.input_i_sep.setCurrentIndex(0) # <--- POPRAWKA: Ustaw domyślny indeks po dodaniu itemów
+        self.input_i_sep.setCurrentIndex(0) 
         self.input_i_right = QLineEdit(placeholderText="String 2")
         inputs_i.addWidget(self.input_i_left)
         inputs_i.addWidget(QLabel("Separator:"))
@@ -118,7 +107,6 @@ class UnitermApp(QWidget):
         group_i.setLayout(layout_i)
         layout.addWidget(group_i)
 
-        # === Group Box II ===
         group_ii = QGroupBox("Etap II")
         layout_ii = QVBoxLayout()
         inputs_ii = QHBoxLayout()
@@ -126,7 +114,7 @@ class UnitermApp(QWidget):
         self.input_ii_sep = QComboBox(editable=False)
         self.input_ii_sep.setFixedWidth(50)
         self.input_ii_sep.addItems([';', ':'])
-        self.input_ii_sep.setCurrentIndex(0) # <--- POPRAWKA: Ustaw domyślny indeks po dodaniu itemów
+        self.input_ii_sep.setCurrentIndex(0) 
         self.input_ii_right = QLineEdit(placeholderText="String 2")
         inputs_ii.addWidget(self.input_ii_left)
         inputs_ii.addWidget(QLabel("Separator:"))
@@ -140,8 +128,7 @@ class UnitermApp(QWidget):
         group_ii.setLayout(layout_ii)
         layout.addWidget(group_ii)
 
-        # === Group Box III ===
-        group_iii = QGroupBox("Etap III: Kombinacja / Wynik")
+        group_iii = QGroupBox("Etap III: Wynik")
         layout_iii = QVBoxLayout()
         combine_btns = QHBoxLayout()
         self.btn_combine_left = QPushButton("Podmień lewą część I przez II", clicked=self.combine_replace_left)
@@ -162,54 +149,46 @@ class UnitermApp(QWidget):
         layout = QVBoxLayout(panel)
         layout.setContentsMargins(5, 5, 5, 5)
 
-        # Zawsze twórz grupę, ale jej stan zależy od db_available
-        self.db_group = QGroupBox("Baza Danych Unitermów") # Zapisz referencję
+        self.db_group = QGroupBox("Baza Danych Unitermów") 
         db_layout = QVBoxLayout()
 
         self.uniterm_list = QListWidget(alternatingRowColors=True)
         self.uniterm_list.itemDoubleClicked.connect(self.load_selected_uniterm)
         db_layout.addWidget(self.uniterm_list)
 
-        db_actions_top_layout = QHBoxLayout()
+        db_actions_layout = QHBoxLayout()
         self.btn_refresh_db = QPushButton("Odśwież", clicked=self.refresh_uniterm_list)
         self.btn_load_db = QPushButton("Załaduj", clicked=self.load_selected_uniterm)
         self.btn_delete_db = QPushButton("Usuń", clicked=self.delete_selected_uniterm)
-        db_actions_top_layout.addWidget(self.btn_refresh_db)
-        db_actions_top_layout.addWidget(self.btn_load_db)
-        db_actions_top_layout.addWidget(self.btn_delete_db)
-        db_layout.addLayout(db_actions_top_layout)
-
-        db_actions_save_layout = QHBoxLayout()
         self.btn_save_iii = QPushButton("Zapisz Wynik", clicked=self.save_current_state)
-        self.btn_save_iii.setToolTip("Zapisz aktualny wynik z Etapu III (wraz ze stanem I i II) do bazy")
-        db_actions_save_layout.addStretch()
-        db_actions_save_layout.addWidget(self.btn_save_iii)
-        db_layout.addLayout(db_actions_save_layout)
+        self.btn_save_iii.setToolTip("Zapisz aktualny wynik z Etapu III do bazy")
+        db_actions_layout.addWidget(self.btn_refresh_db)
+        db_actions_layout.addWidget(self.btn_load_db)
+        db_actions_layout.addWidget(self.btn_delete_db)
+        db_actions_layout.addWidget(self.btn_save_iii)
+        db_layout.addLayout(db_actions_layout)
 
         self.db_group.setLayout(db_layout)
         layout.addWidget(self.db_group)
 
-        # Ustaw stan grupy i tytuł na podstawie db_available
         if not self.db_available:
             self.db_group.setEnabled(False)
             self.db_group.setTitle(f"{self.db_group.title()} (Niedostępna)")
         else:
-             # Upewnij się, że jest włączona, jeśli DB jest dostępna
              self.db_group.setEnabled(True)
-             self.db_group.setTitle(f"{self.db_group.title()} (MySQL + SQLAlchemy)")
+             self.db_group.setTitle(f"{self.db_group.title()} ")
 
         return panel
 
     def _validate_inputs(self, left_input: QLineEdit, right_input: QLineEdit, sep_input: QComboBox) -> Optional[Tuple[str, str, str]]:
         left = left_input.text().strip()
         right = right_input.text().strip()
-        sep = sep_input.currentText() # Pobierz aktualnie wybrany tekst separatora
+        sep = sep_input.currentText() 
 
         if not left or not right:
             QMessageBox.warning(self, "Błąd danych", "Pola 'String 1' i 'String 2' muszą być wypełnione.")
             return None
 
-        # Sprawdź, czy separator jest wybrany (nie powinien być pusty)
         if not sep:
              QMessageBox.warning(self, "Błąd danych", "Musisz wybrać separator.")
              return None
@@ -225,7 +204,6 @@ class UnitermApp(QWidget):
         if not full_string_iii:
              return None
 
-        # Używamy self.uniterm_i i self.uniterm_ii, które są krotkami (lub None)
         s1_l, s1_r, s1_s = self.uniterm_i if self.uniterm_i else ('', '', '')
         s2_l, s2_r, s2_s = self.uniterm_ii if self.uniterm_ii else ('', '', '')
 
@@ -247,7 +225,6 @@ class UnitermApp(QWidget):
         self.input_i_right.clear()
         self.input_ii_left.clear()
         self.input_ii_right.clear()
-        # Ustaw domyślne separatory po wyczyszczeniu
         self.input_i_sep.setCurrentIndex(0)
         self.input_ii_sep.setCurrentIndex(0)
         self.display_i.clear()
@@ -260,21 +237,20 @@ class UnitermApp(QWidget):
         validated_data = self._validate_inputs(self.input_i_left, self.input_i_right, self.input_i_sep)
         if validated_data:
             left, right, sep = validated_data
-            self.uniterm_i = (left, right, sep) # Przechowuj jako krotkę
+            self.uniterm_i = (left, right, sep) 
             self.display_i.setUniterm(left, right, sep)
 
     def generate_uniterm_ii(self):
         validated_data = self._validate_inputs(self.input_ii_left, self.input_ii_right, self.input_ii_sep)
         if validated_data:
             left, right, sep = validated_data
-            self.uniterm_ii = (left, right, sep) # Przechowuj jako krotkę
+            self.uniterm_ii = (left, right, sep) 
             self.display_ii.setUniterm(left, right, sep)
 
     def combine_replace_left(self):
         if not self.uniterm_i or not self.uniterm_ii:
             QMessageBox.warning(self, "Brak danych", "Najpierw wygeneruj lub załaduj Unitermy I i II.")
             return
-        # Rozpakuj krotki
         _, u1_right, u1_sep = self.uniterm_i
         u2_left, u2_right, u2_sep = self.uniterm_ii
 
@@ -285,7 +261,6 @@ class UnitermApp(QWidget):
         if not self.uniterm_i or not self.uniterm_ii:
             QMessageBox.warning(self, "Brak danych", "Najpierw wygeneruj lub załaduj Unitermy I i II.")
             return
-        # Rozpakuj krotki
         u1_left, _, u1_sep = self.uniterm_i
         u2_left, u2_right, u2_sep = self.uniterm_ii
 
@@ -302,21 +277,18 @@ class UnitermApp(QWidget):
             QMessageBox.warning(self, "Brak danych", "Wyświetlacz Etapu III jest pusty. Nic do zapisania.")
             return
 
-        full_string_to_save = current_state_dict["full_string_iii"] # Potrzebne do komunikatu błędu
+        full_string_to_save = current_state_dict["full_string_iii"]
 
         try:
-            # save_uniterm zwraca teraz krotkę (id, full_string) lub None
             save_result = self.uniterm_repo.save_uniterm(current_state_dict)
 
             if save_result is not None:
-                # Rozpakuj krotkę
                 saved_id, saved_fs = save_result
 
-                # Sprawdź, czy ID już istnieje na liście (czyli był to duplikat)
                 existing_on_list = False
                 for i in range(self.uniterm_list.count()):
                     item = self.uniterm_list.item(i)
-                    item_data = item.data(Qt.ItemDataRole.UserRole) # ID jest przechowywane tutaj
+                    item_data = item.data(Qt.ItemDataRole.UserRole) 
                     if isinstance(item_data, int) and item_data == saved_id:
                         existing_on_list = True
                         break
@@ -325,22 +297,18 @@ class UnitermApp(QWidget):
                     QMessageBox.information(self, "Uniterm Istnieje",
                                              f"Uniterm '{saved_fs}' (ID: {saved_id}) już istnieje.")
                 else:
-                    # Zapisano nowy
                     QMessageBox.information(self, "Zapisano",
                                              f"Zapisano nowy uniterm '{saved_fs}' (ID: {saved_id}).")
-                    self.refresh_uniterm_list() # Odśwież listę tylko po dodaniu nowego
+                    self.refresh_uniterm_list() 
             else:
-                # Błąd zapisu (save_result is None)
                 QMessageBox.critical(self, "Błąd Zapisu", f"Nie udało się zapisać unitermu '{full_string_to_save}'. Sprawdź logi konsoli.")
 
         except Exception as e:
             traceback.print_exc()
             QMessageBox.critical(self, "Krytyczny Błąd Zapisu", f"Wystąpił nieoczekiwany błąd podczas zapisu: {e}")
-    # --- KONIEC ZMIENIONEJ METODY ---
 
     def refresh_uniterm_list(self):
-        # ... (bez zmian) ...
-        if not self.db_available or not self.uniterm_repo: # Sprawdź też repo
+        if not self.db_available or not self.uniterm_repo: 
             self.uniterm_list.clear()
             self.uniterm_list.addItem("Baza danych niedostępna.")
             self.uniterm_list.setEnabled(False)
@@ -390,29 +358,26 @@ class UnitermApp(QWidget):
             return
 
         selected_item = selected_items[0]
-        item_id = selected_item.data(Qt.ItemDataRole.UserRole) # Pobierz ID
+        item_id = selected_item.data(Qt.ItemDataRole.UserRole) 
 
         if not isinstance(item_id, int):
              QMessageBox.critical(self, "Błąd Danych", "Zaznaczony element nie zawiera poprawnego ID.")
              return
 
         try:
-            # get_uniterm_by_id zwraca teraz słownik lub None
             loaded_data = self.uniterm_repo.get_uniterm_by_id(item_id)
 
             if loaded_data is None:
                 QMessageBox.warning(self, "Błąd Ładowania", f"Nie znaleziono unitermu o ID {item_id} w bazie danych.")
                 return
 
-            # Użyj dostępu przez klucze słownika zamiast atrybutów obiektu
-            s1_l = loaded_data.get('stage1_left', '') # Użyj .get() dla bezpieczeństwa
+            s1_l = loaded_data.get('stage1_left', '') 
             s1_r = loaded_data.get('stage1_right', '')
-            s1_s = loaded_data.get('stage1_separator') or ';' # Domyślny, jeśli None lub pusty
+            s1_s = loaded_data.get('stage1_separator') or ';' 
             idx_i = self.input_i_sep.findText(s1_s)
             self.input_i_left.setText(s1_l)
             self.input_i_right.setText(s1_r)
             self.input_i_sep.setCurrentIndex(idx_i if idx_i >= 0 else 0)
-            # Ustaw self.uniterm_i, jeśli dane istnieją
             self.uniterm_i = (s1_l, s1_r, s1_s) if s1_l or s1_r else None
             self.display_i.setUniterm(s1_l, s1_r, s1_s)
 
@@ -423,7 +388,6 @@ class UnitermApp(QWidget):
             self.input_ii_left.setText(s2_l)
             self.input_ii_right.setText(s2_r)
             self.input_ii_sep.setCurrentIndex(idx_ii if idx_ii >= 0 else 0)
-            # Ustaw self.uniterm_ii, jeśli dane istnieją
             self.uniterm_ii = (s2_l, s2_r, s2_s) if s2_l or s2_r else None
             self.display_ii.setUniterm(s2_l, s2_r, s2_s)
 
@@ -441,10 +405,8 @@ class UnitermApp(QWidget):
         except Exception as e:
              traceback.print_exc()
              QMessageBox.critical(self, "Błąd Ładowania", f"Wystąpił nieoczekiwany błąd podczas ładowania danych: {e}")
-    # --- KONIEC ZMIENIONEJ METODY ---
 
     def delete_selected_uniterm(self):
-        # Sprawdź dostępność DB i repo przed próbą usunięcia
         if not self.db_available or not self.uniterm_repo:
              QMessageBox.warning(self, "Baza Niedostępna", "Nie można usunąć danych.")
              return

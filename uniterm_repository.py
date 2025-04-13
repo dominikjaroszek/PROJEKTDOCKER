@@ -1,6 +1,4 @@
-# uniterm_repository.py
-
-from typing import List, Optional, Dict, Tuple # Upewnij się, że Tuple jest importowany
+from typing import List, Optional, Dict, Tuple 
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from database_models import UnitermModel
@@ -10,32 +8,27 @@ class UnitermRepository:
     def __init__(self, db_manager: DatabaseManager):
         self.db_manager = db_manager
 
-    # --- UPEWNIJ SIĘ, ŻE TA METODA JEST POPRAWNA ---
     def get_all_uniterms_for_list(self) -> List[Tuple[int, str]]:
         """Retrieves only ID and display string for list display."""
         results = []
         try:
             with self.db_manager.get_session() as session:
-                # Zapytanie o konkretne kolumny: id i full_string
                 query_result = session.query(
                         UnitermModel.id,
-                        UnitermModel.full_string # Pobieramy tylko to, co potrzebne
+                        UnitermModel.full_string
                     ).order_by(UnitermModel.id).all()
 
-                # Tworzenie listy krotek (id, sformatowany_string)
                 results = [(id_val, f"ID: {id_val} - {fs_val}") for id_val, fs_val in query_result]
 
-            return results # Zwróć listę krotek
+            return results 
         except SQLAlchemyError as e:
             print(f"Error fetching uniterm list data: {e}")
             return []
         except Exception as e:
              print(f"Unexpected error fetching uniterm list data: {e}")
              return []
-    # --- KONIEC POPRAWIONEJ METODY ---
 
     def save_uniterm(self, uniterm_data: Dict) -> Optional[Tuple[int, str]]:
-        # ... (pozostaje bez zmian - zwraca krotkę) ...
         full_string_to_save = uniterm_data.get('full_string_iii')
         if not full_string_to_save:
             print("Error: 'full_string_iii' missing in data for save.")
@@ -66,7 +59,7 @@ class UnitermRepository:
                      return None
                 saved_id = new_uniterm.id
                 saved_fs = new_uniterm.full_string
-                return (saved_id, saved_fs) # Return tuple before session closes
+                return (saved_id, saved_fs) 
         except IntegrityError as e:
             print(f"Error saving uniterm (Integrity Constraint): {e}")
             try:
@@ -85,7 +78,6 @@ class UnitermRepository:
              return None
 
     def update_uniterm(self, uniterm_id: int, uniterm_data: Dict) -> bool:
-        # ... (bez zmian) ...
         new_full_string = uniterm_data.get('full_string_iii')
         if not new_full_string:
             print("Error: 'full_string_iii' is required for update.")
@@ -127,7 +119,6 @@ class UnitermRepository:
              return False
 
     def get_uniterm_by_id(self, uniterm_id: int) -> Optional[Dict]:
-        # ... (bez zmian - zwraca słownik) ...
         try:
             with self.db_manager.get_session() as session:
                 uniterm = session.get(UnitermModel, uniterm_id)
@@ -157,7 +148,6 @@ class UnitermRepository:
              return None
 
     def check_uniterm_exists(self, full_string: str) -> Optional[int]:
-        # ... (bez zmian) ...
         if not full_string:
             return None
         try:
@@ -172,7 +162,6 @@ class UnitermRepository:
              return None
 
     def delete_uniterm(self, uniterm_id: int) -> bool:
-        # ... (bez zmian) ...
         try:
             with self.db_manager.get_session() as session:
                 uniterm_to_delete = session.get(UnitermModel, uniterm_id)

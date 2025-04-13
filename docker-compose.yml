@@ -1,6 +1,6 @@
 services:
   mysql_db:
-    container_name: mysql_container # KLUCZOWA ZMIANA - nadajemy jawną nazwę
+    container_name: mysql_container 
     image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
