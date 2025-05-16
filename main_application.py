@@ -1,5 +1,3 @@
-# main_application.py
-
 import sys
 import traceback
 from typing import Optional, Tuple, Dict
@@ -11,24 +9,19 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
-# Importy z refaktoryzowanych modułów
 from config import CONFIG
 from database_manager import DatabaseManager
 from uniterm_repository import UnitermRepository
 from gui_widgets import UnitermWidget
 
 class UnitermGenerator:
-    """Klasa odpowiedzialna za generowanie i łączenie unitermów."""
-
     def __init__(self):
         pass
 
     def generate_uniterm(self, left_part: str, right_part: str, separator: str) -> Tuple[str, str, str]:
-        """Generuje uniterm z podanych danych."""
         return left_part, right_part, separator
 
     def combine_replace_left(self, uniterm_i: Tuple[str, str, str], uniterm_ii: Tuple[str, str, str]) -> Tuple[str, str, str, str, str]:
-        """Łączy unitermy, podstawiając lewą część unitermu II do unitermu I."""
         if not uniterm_i or not uniterm_ii:
             raise ValueError("Unitermy I i II nie zostały wygenerowane")
         _, uniterm_i_right_part, uniterm_i_separator = uniterm_i
@@ -37,7 +30,6 @@ class UnitermGenerator:
         return new_left_part, uniterm_i_right_part, uniterm_i_separator, new_left_part, 'left'
 
     def combine_replace_right(self, uniterm_i: Tuple[str, str, str], uniterm_ii: Tuple[str, str, str]) -> Tuple[str, str, str, str, str]:
-        """Łączy unitermy, podstawiając prawą część unitermu II do unitermu I."""
         if not uniterm_i or not uniterm_ii:
             raise ValueError("Unitermy I i II nie zostały wygenerowane")
         uniterm_i_left_part, _, uniterm_i_separator = uniterm_i
@@ -46,51 +38,38 @@ class UnitermGenerator:
         return uniterm_i_left_part, new_right_part, uniterm_i_separator, new_right_part, 'right'
 
 class DatabaseInteraction:
-    """Klasa odpowiedzialna za interakcje z bazą danych."""
-
     def __init__(self, db_manager: DatabaseManager, uniterm_repo: UnitermRepository):
-        """Inicjalizuje klasę z menedżerem bazy danych i repozytorium."""
         self.db_manager = db_manager
         self.uniterm_repo = uniterm_repo
 
     def save_uniterm(self, data: Dict):
-        """Zapisuje uniterm do bazy danych."""
         if not self.uniterm_repo:
             raise Exception("Repozytorium jest niedostępne.")
         return self.uniterm_repo.save_uniterm(data)
 
     def get_all_uniterms(self):
-        """Pobiera wszystkie unitermy z bazy danych."""
         if not self.uniterm_repo:
             raise Exception("Repozytorium jest niedostępne.")
         return self.uniterm_repo.get_all_uniterms_for_list()
 
     def get_uniterm_by_id(self, uniterm_id: int):
-        """Pobiera uniterm o podanym ID z bazy danych."""
         if not self.uniterm_repo:
             raise Exception("Repozytorium jest niedostępne.")
         return self.uniterm_repo.get_uniterm_by_id(uniterm_id)
 
     def delete_uniterm(self, uniterm_id: int):
-        """Usuwa uniterm o podanym ID z bazy danych."""
         if not self.uniterm_repo:
             raise Exception("Repozytorium jest niedostępne.")
         return self.uniterm_repo.delete_uniterm(uniterm_id)
 
 class AppState:
-    """Klasa przechowująca stan aplikacji."""
-
     def __init__(self):
-        """Inicjalizuje stan aplikacji."""
         self.uniterm_i: Optional[Tuple[str, str, str]] = None
         self.uniterm_ii: Optional[Tuple[str, str, str]] = None
         self.is_database_available = False
 
 class UnitermApp(QWidget):
-    """Główna klasa aplikacji."""
-
     def __init__(self):
-        """Inicjalizuje aplikację."""
         super().__init__()
         self.app_state = AppState()
         self.db_available = False
@@ -117,7 +96,6 @@ class UnitermApp(QWidget):
              self.refresh_uniterm_list()
 
     def init_db_check(self):
-        """Sprawdza dostępność i konfigurację bazy danych."""
         if not self.database_manager:
              self.app_state.is_database_available = False
              return
@@ -138,8 +116,7 @@ class UnitermApp(QWidget):
              self.app_state.is_database_available = False
 
     def init_ui(self):
-        """Inicjalizuje interfejs użytkownika."""
-        self.setWindowTitle('Uniterm Generator & Combiner (Refactored)')
+        self.setWindowTitle('Uniterm')
         self.setGeometry(100, 100, 950, 700)
 
         main_layout = QHBoxLayout(self)
@@ -148,7 +125,6 @@ class UnitermApp(QWidget):
         left_panel = self._create_left_panel()
         splitter.addWidget(left_panel)
 
-        # Panel DB tworzymy zawsze, ale może być wyłączony
         right_panel = self._create_right_panel()
         splitter.addWidget(right_panel)
 
@@ -161,7 +137,6 @@ class UnitermApp(QWidget):
         layout = QVBoxLayout(panel)
         layout.setSpacing(15)
 
-        # === Group Box I ===
         group_i = QGroupBox("Etap I")
         layout_i = QVBoxLayout()
         inputs_i = QHBoxLayout()
@@ -169,7 +144,7 @@ class UnitermApp(QWidget):
         self.input_i_separator = QComboBox(editable=False)
         self.input_i_separator.setFixedWidth(50)
         self.input_i_separator.addItems([';', ':'])
-        self.input_i_separator.setCurrentIndex(0) # <--- POPRAWKA: Ustaw domyślny indeks po dodaniu itemów
+        self.input_i_separator.setCurrentIndex(0)
         self.input_i_right_part = QLineEdit(placeholderText="String 2")
         inputs_i.addWidget(self.input_i_left_part)
         inputs_i.addWidget(QLabel("Separator:"))
@@ -183,7 +158,6 @@ class UnitermApp(QWidget):
         group_i.setLayout(layout_i)
         layout.addWidget(group_i)
 
-        # === Group Box II ===
         group_ii = QGroupBox("Etap II")
         layout_ii = QVBoxLayout()
         inputs_ii = QHBoxLayout()
@@ -191,7 +165,7 @@ class UnitermApp(QWidget):
         self.input_ii_separator = QComboBox(editable=False)
         self.input_ii_separator.setFixedWidth(50)
         self.input_ii_separator.addItems([';', ':'])
-        self.input_ii_separator.setCurrentIndex(0) # <--- POPRAWKA: Ustaw domyślny indeks po dodaniu itemów
+        self.input_ii_separator.setCurrentIndex(0)
         self.input_ii_right_part = QLineEdit(placeholderText="String 2")
         inputs_ii.addWidget(self.input_ii_left_part)
         inputs_ii.addWidget(QLabel("Separator:"))
@@ -205,7 +179,6 @@ class UnitermApp(QWidget):
         group_ii.setLayout(layout_ii)
         layout.addWidget(group_ii)
 
-        # === Group Box III ===
         group_iii = QGroupBox("Etap III: Kombinacja / Wynik")
         layout_iii = QVBoxLayout()
         combine_btns = QHBoxLayout()
@@ -227,8 +200,7 @@ class UnitermApp(QWidget):
         layout = QVBoxLayout(panel)
         layout.setContentsMargins(5, 5, 5, 5)
 
-        # Zawsze twórz grupę, ale jej stan zależy od db_available
-        self.database_group = QGroupBox("Baza Danych Unitermów") # Zapisz referencję
+        self.database_group = QGroupBox("Baza Danych Unitermów")
         db_layout = QVBoxLayout()
 
         self.uniterm_list_widget = QListWidget(alternatingRowColors=True)
@@ -239,34 +211,26 @@ class UnitermApp(QWidget):
         self.btn_refresh_database = QPushButton("Odśwież", clicked=self.refresh_uniterm_list)
         self.btn_load_from_database = QPushButton("Załaduj", clicked=self.load_selected_uniterm)
         self.btn_delete_from_database = QPushButton("Usuń", clicked=self.delete_selected_uniterm)
+        self.btn_save_to_database = QPushButton("Zapisz Wynik", clicked=self.save_current_state)
+        self.btn_save_to_database.setToolTip("Zapisz aktualny wynik z Etapu III do bazy")
+        db_actions_top_layout.addWidget(self.btn_save_to_database)
         db_actions_top_layout.addWidget(self.btn_refresh_database)
         db_actions_top_layout.addWidget(self.btn_load_from_database)
         db_actions_top_layout.addWidget(self.btn_delete_from_database)
         db_layout.addLayout(db_actions_top_layout)
 
-        db_actions_save_layout = QHBoxLayout()
-        self.btn_save_to_database = QPushButton("Zapisz Wynik", clicked=self.save_current_state)
-        self.btn_save_to_database.setToolTip("Zapisz aktualny wynik z Etapu III (wraz ze stanem I i II) do bazy")
-        db_actions_save_layout.addStretch()
-        db_actions_save_layout.addWidget(self.btn_save_to_database)
-        db_layout.addLayout(db_actions_save_layout)
-
         self.database_group.setLayout(db_layout)
         layout.addWidget(self.database_group)
 
-        # Ustaw stan grupy i tytuł na podstawie db_available
         if not self.app_state.is_database_available:
             self.database_group.setEnabled(False)
             self.database_group.setTitle(f"{self.database_group.title()} (Niedostępna)")
         else:
-             # Upewnij się, że jest włączona, jeśli DB jest dostępna
              self.database_group.setEnabled(True)
-             self.database_group.setTitle(f"{self.database_group.title()} (MySQL + SQLAlchemy)")
 
         return panel
     
     def _validate_inputs(self, left_input: QLineEdit, right_input: QLineEdit, sep_input: QComboBox) -> Optional[Tuple[str, str, str]]:
-        """Waliduje pola wejściowe."""
         left = left_input.text().strip()
         right = right_input.text().strip()
         sep = sep_input.currentText()
@@ -282,7 +246,6 @@ class UnitermApp(QWidget):
         return left, right, sep
 
     def generate_uniterm_i(self):
-        """Obsługuje generowanie unitermu I."""
         validated_data = self._validate_inputs(self.input_i_left_part, self.input_i_right_part, self.input_i_separator)
         if validated_data:
             left, right, sep = validated_data
@@ -290,7 +253,6 @@ class UnitermApp(QWidget):
             self.display_uniterm_i.setUniterm(left, right, sep)
 
     def generate_uniterm_ii(self):
-        """Obsługuje generowanie unitermu II."""
         validated_data = self._validate_inputs(self.input_ii_left_part, self.input_ii_right_part, self.input_ii_separator)
         if validated_data:
             left, right, sep = validated_data
@@ -298,7 +260,6 @@ class UnitermApp(QWidget):
             self.display_uniterm_ii.setUniterm(left, right, sep)
 
     def combine_replace_left(self):
-        """Obsługuje kombinację "Podmień lewą część I przez II"."""
         if not self.app_state.uniterm_i or not self.app_state.uniterm_ii:
             QMessageBox.warning(self, "Brak danych", "Najpierw wygeneruj lub załaduj Unitermy I i II.")
             return
@@ -309,7 +270,6 @@ class UnitermApp(QWidget):
             QMessageBox.warning(self, "Błąd", str(e))
 
     def combine_replace_right(self):
-        """Obsługuje kombinację "Podmień prawą część I przez II"."""
         if not self.app_state.uniterm_i or not self.app_state.uniterm_ii:
             QMessageBox.warning(self, "Brak danych", "Najpierw wygeneruj lub załaduj Unitermy I i II.")
             return
@@ -320,7 +280,6 @@ class UnitermApp(QWidget):
             QMessageBox.warning(self, "Błąd", str(e))
 
     def _get_current_state_for_db(self) -> Optional[Dict]:
-        """Pobiera aktualny stan do zapisu w bazie danych."""
         uniterm_iii_left_part = self.display_uniterm_iii._left_part
         uniterm_iii_right_part = self.display_uniterm_iii._right_part
         uniterm_iii_separator = self.display_uniterm_iii._separator
@@ -353,7 +312,6 @@ class UnitermApp(QWidget):
         }
 
     def save_current_state(self):
-        """Zapisuje aktualny stan do bazy danych."""
         if not self.app_state.is_database_available or not self.db_interaction:
             QMessageBox.warning(self, "Baza Niedostępna", "Nie można zapisać, baza danych jest niedostępna lub nie zainicjowano repozytorium.")
             return
@@ -388,7 +346,6 @@ class UnitermApp(QWidget):
             QMessageBox.critical(self, "Krytyczny Błąd Zapisu", f"Wystąpił nieoczekiwany błąd podczas zapisu: {e}")
 
     def refresh_uniterm_list(self):
-        """Odświeża listę unitermów."""
         if not self.app_state.is_database_available or not self.db_interaction:
             self.uniterm_list_widget.clear()
             self.uniterm_list_widget.addItem("Baza danych niedostępna.")
@@ -430,7 +387,6 @@ class UnitermApp(QWidget):
              self.btn_delete_from_database.setEnabled(False)
 
     def load_selected_uniterm(self):
-        """Wczytuje wybrany uniterm z bazy danych."""
         if not self.app_state.is_database_available or not self.db_interaction:
              QMessageBox.warning(self, "Baza Niedostępna", "Nie można załadować danych.")
              return
@@ -440,7 +396,7 @@ class UnitermApp(QWidget):
             return
 
         selected_item = selected_items[0]
-        uniterm_id = selected_item.data(Qt.ItemDataRole.UserRole) # Pobierz ID
+        uniterm_id = selected_item.data(Qt.ItemDataRole.UserRole)
 
         if not isinstance(uniterm_id, int):
              QMessageBox.critical(self, "Błąd Danych", "Zaznaczony element nie zawiera poprawnego ID.")
@@ -489,7 +445,6 @@ class UnitermApp(QWidget):
              QMessageBox.critical(self, "Błąd Ładowania", f"Wystąpił nieoczekiwany błąd podczas ładowania danych: {e}")
 
     def delete_selected_uniterm(self):
-        """Usuwa wybrany uniterm z bazy danych."""
         if not self.app_state.is_database_available or not self.db_interaction:
              QMessageBox.warning(self, "Baza Niedostępna", "Nie można usunąć danych.")
              return

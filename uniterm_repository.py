@@ -1,5 +1,3 @@
-# uniterm_repository.py
-
 from typing import Dict, Optional, Tuple
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import declarative_base
@@ -28,7 +26,6 @@ class UnitermRepository:
         self.db_manager = db_manager
 
     def save_new_uniterm(self, uniterm_data: Dict) -> Optional[Tuple[int, str]]:
-        """Zapisuje nowy uniterm do bazy danych."""
         full_string_to_save = uniterm_data.get('full_string')
         if not full_string_to_save:
             print("Error: 'full_string' missing in data for save.")
@@ -59,11 +56,9 @@ class UnitermRepository:
             return None
 
     def save_uniterm(self, uniterm_data: Dict) -> Optional[Tuple[int, str]]:
-        """Sprawdza czy Uniterm istnieje, jeśli tak zwraca jego ID i pełen string, w innym przypadku zapisuje do DB i zwraca jego ID i pełen string"""
         return self.save_new_uniterm(uniterm_data)
 
     def get_all_uniterms_for_list(self) -> Optional[list[Tuple[int, str]]]:
-        """Pobiera wszystkie unitermy z bazy danych."""
         try:
             with self.db_manager.get_session() as session:
                 uniterms = session.query(UnitermModel).all()
@@ -73,7 +68,6 @@ class UnitermRepository:
             return None
 
     def get_uniterm_by_id(self, uniterm_id: int) -> Optional[Dict]:
-        """Pobiera uniterm o podanym ID z bazy danych."""
         try:
             with self.db_manager.get_session() as session:
                 uniterm = session.query(UnitermModel).filter_by(id=uniterm_id).first()
@@ -98,7 +92,6 @@ class UnitermRepository:
              return None
 
     def delete_uniterm(self, uniterm_id: int) -> bool:
-        """Usuwa uniterm o podanym ID z bazy danych."""
         try:
             with self.db_manager.get_session() as session:
                 uniterm_to_delete = session.query(UnitermModel).filter_by(id=uniterm_id).first()

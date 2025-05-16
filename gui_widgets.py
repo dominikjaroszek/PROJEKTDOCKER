@@ -1,5 +1,3 @@
-# gui_widgets.py
-
 from PyQt6.QtWidgets import QWidget
 from PyQt6.QtGui import QPainter, QPen, QFontMetrics, QColor, QFont
 from PyQt6.QtCore import Qt, QRectF, QSize
@@ -41,7 +39,7 @@ class UnitermWidget(QWidget):
     def get_full_string(self):
         if not self._left_part and not self._right_part and not self._separator:
              return ""
-        return f"{self._left_part} {self._separator} {self._right_part}" # Dodano spacje przed i po separatorze
+        return f"{self._left_part} {self._separator} {self._right_part}" 
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -55,21 +53,19 @@ class UnitermWidget(QWidget):
 
         font = self.font()
         fm = QFontMetrics(font)
-        # Dodano zmienne do wyliczenia położeń
         space_width = fm.horizontalAdvance(" ")
         left_part_width = fm.horizontalAdvance(self._left_part) if self._left_part else 0
         separator_width = fm.horizontalAdvance(self._separator) if self._separator else 0
         right_part_width = fm.horizontalAdvance(self._right_part) if self._right_part else 0
         
-        text_width = left_part_width + separator_width + right_part_width + space_width * 2 #Dwie spacje w sumie
+        text_width = left_part_width + separator_width + right_part_width + space_width * 2 
         text_height = fm.height()
         widget_width = self.width()
         widget_height = self.height()
 
         text_x = (widget_width - text_width) / 2
         text_y = widget_height - fm.descent() - 10
-        # Zmiana koloru tekstu na niebieski
-        painter.setPen(QColor(66, 135, 245))  # RGB: (0, 0, 255) - niebieski
+        painter.setPen(QColor(66, 135, 245)) 
         painter.setFont(font)
         
         current_x_pos = text_x
@@ -79,8 +75,7 @@ class UnitermWidget(QWidget):
         current_x_pos += separator_width + space_width
         painter.drawText(int(current_x_pos), int(text_y), self._right_part)
 
-        # Zmiana koloru łuku na niebieski
-        main_arc_pen = QPen(QColor(66, 135, 245), 2)  # RGB: (0, 0, 255) - niebieski
+        main_arc_pen = QPen(QColor(66, 135, 245), 2)  
         painter.setPen(main_arc_pen)
         arc_padding = 5
         main_arc_x = text_x - arc_padding
@@ -95,8 +90,7 @@ class UnitermWidget(QWidget):
         if self._nested_text and self._nested_side:
             nested_text_width = fm.horizontalAdvance(self._nested_text)
             
-            # Obliczenie przesunięcia separatora w lewo
-            separator_shift = separator_width / 1.5 if separator_width > 0 else 0  # Przesunięcie o 1/2 szerokości separatora
+            separator_shift = separator_width / 1.5 if separator_width > 0 else 0  
             
             nested_arc_center_x = 0
             if self._nested_side == 'left' and left_part_width > 0:
@@ -107,7 +101,7 @@ class UnitermWidget(QWidget):
                  nested_arc_center_x = text_x + (text_width / 2)
 
 
-            nested_arc_pen = QPen(QColor(128, 128, 128), 1.5) # Domyślny szary nested arc
+            nested_arc_pen = QPen(QColor(128, 128, 128), 1.5) 
             painter.setPen(nested_arc_pen)
             nested_padding = 3
             nested_arc_width = nested_text_width + 2 * nested_padding
